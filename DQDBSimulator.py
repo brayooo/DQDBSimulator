@@ -146,7 +146,7 @@ class DQDBSimulator(QWidget):
         self.draw_node_status(painter)
 
     def draw_bus(self, painter):
-        pen = QPen(Qt.GlobalColor.black, 2, Qt.PenStyle.SolidLine)
+        pen = QPen(Qt.GlobalColor.blue, 2, Qt.PenStyle.SolidLine)
         painter.setPen(pen)
         painter.drawLine(*self.bus_a[0], *self.bus_a[1])
         painter.drawLine(*self.bus_b[0], *self.bus_b[1])
