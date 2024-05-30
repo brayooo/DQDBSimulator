@@ -57,8 +57,8 @@ class MainWindow(QMainWindow):
     def reset_simulation(self):
         self.simulator.reset_simulation()
 
-    def set_custom_slots(self, start_node, end_node, bus):
-        self.simulator.set_custom_slots(start_node, end_node, bus)
+    def set_custom_slots(self, start_node, end_node):
+        self.simulator.set_custom_slots(start_node, end_node)
 
 def main():
     app = QApplication(sys.argv)
