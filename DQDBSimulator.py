@@ -7,7 +7,7 @@ from custom_simulation_logic import CustomSimulationLogic
 class DQDBSimulator(QWidget):
     MAX_SLOTS = 4  # Limiting the number of active slots
 
-    def __init__(self, log_widget, speed_slider):
+    def __init__(self, log_widget):
         super().__init__()
         self.nodos = [(100, 200), (200, 200), (300, 200), (400, 200), (500, 200)]
         self.node_functions = [random.choice(['send', 'receive']) for _ in self.nodos]
@@ -18,7 +18,6 @@ class DQDBSimulator(QWidget):
         self.slots = []
         self.slots_to_remove = []
         self.log_widget = log_widget
-        self.speed_slider = speed_slider
         self.timer = QTimer(self)
         self.custom_logic = CustomSimulationLogic(self)
         self.init_ui()
@@ -58,11 +57,11 @@ class DQDBSimulator(QWidget):
             else:
                 slot = {'position': [550, 250], 'direction': 'backward', 'current_node': len(self.nodos) - 1, 'bus': 'B', 'type': slot_type, 'received': False}
             self.slots.append(slot)
-            self.log_widget.append(f"New {slot_type} slot spawned in bus {bus}")
+            self.log_widget.append(f"Nuevo slot de {slot_type} generado en el bus {bus}")
             # Create a timer for the new slot
             slot_timer = QTimer(self)
             slot_timer.timeout.connect(lambda s=slot: self.update_simulation(s))
-            slot_timer.start(self.speed_slider.value())  # Update based on slider value
+            slot_timer.start(50)  # Update based on a fixed value
             slot['timer'] = slot_timer
 
     def update_simulation(self, slot):
@@ -85,21 +84,21 @@ class DQDBSimulator(QWidget):
                 slot['position'][0] += 2
             else:
                 slot['direction'] = 'down'
-                log_msg = f"Slot entering node C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
-                self.node_status[slot['current_node']] = "Processing"
+                log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
+                self.node_status[slot['current_node']] = "Procesando"
                 self.node_colors[slot['current_node']] = "processing"
         elif slot['direction'] == 'down':
             if slot['position'][1] < self.nodos[slot['current_node']][1]:
                 slot['position'][1] += 2
             else:
                 if self.node_functions[slot['current_node']] == 'receive' and slot['type'] == 'receive':
-                    log_msg = f"Node C{slot['current_node'] + 1} is receiving the slot."
+                    log_msg = f"El nodo C{slot['current_node'] + 1} está recibiendo el slot."
                     slot['received'] = True
-                    self.node_status[slot['current_node']] = "Received"
+                    self.node_status[slot['current_node']] = "Recibido"
                     self.node_colors[slot['current_node']] = "received"
                 else:
-                    log_msg = f"Node C{slot['current_node'] + 1} is sending data"
-                    self.node_status[slot['current_node']] = "Sending"
+                    log_msg = f"El nodo C{slot['current_node'] + 1} está enviando datos"
+                    self.node_status[slot['current_node']] = "Enviando"
                     self.node_colors[slot['current_node']] = "sending"
                 slot['direction'] = 'up'
         elif slot['direction'] == 'up':
@@ -107,7 +106,7 @@ class DQDBSimulator(QWidget):
                 slot['position'][1] -= 2
             else:
                 slot['direction'] = 'forward'
-                log_msg = f"Slot exiting node C{slot['current_node'] + 1}"
+                log_msg = f"Slot saliendo del nodo C{slot['current_node'] + 1}"
                 slot['current_node'] = (slot['current_node'] + 1) % len(self.nodos)
                 self.node_status[slot['current_node']] = "Idle"
                 self.node_colors[slot['current_node']] = "base"
@@ -128,21 +127,21 @@ class DQDBSimulator(QWidget):
                 slot['position'][0] -= 2
             else:
                 slot['direction'] = 'up'
-                log_msg = f"Slot entering node C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
-                self.node_status[slot['current_node']] = "Processing"
+                log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
+                self.node_status[slot['current_node']] = "Procesando"
                 self.node_colors[slot['current_node']] = "processing"
         elif slot['direction'] == 'up':
             if slot['position'][1] > self.nodos[slot['current_node']][1]:
                 slot['position'][1] -= 2
             else:
                 if self.node_functions[slot['current_node']] == 'receive' and slot['type'] == 'receive':
-                    log_msg = f"Node C{slot['current_node'] + 1} is receiving the slot."
+                    log_msg = f"El nodo C{slot['current_node'] + 1} está recibiendo el slot."
                     slot['received'] = True
-                    self.node_status[slot['current_node']] = "Received"
+                    self.node_status[slot['current_node']] = "Recibido"
                     self.node_colors[slot['current_node']] = "received"
                 else:
-                    log_msg = f"Node C{slot['current_node'] + 1} is sending data"
-                    self.node_status[slot['current_node']] = "Sending"
+                    log_msg = f"El nodo C{slot['current_node'] + 1} está enviando datos"
+                    self.node_status[slot['current_node']] = "Enviando"
                     self.node_colors[slot['current_node']] = "sending"
                 slot['direction'] = 'down'
         elif slot['direction'] == 'down':
@@ -150,7 +149,7 @@ class DQDBSimulator(QWidget):
                 slot['position'][1] += 2
             else:
                 slot['direction'] = 'backward'
-                log_msg = f"Slot exiting node C{slot['current_node'] + 1}"
+                log_msg = f"Slot saliendo del nodo C{slot['current_node'] + 1}"
                 slot['current_node'] = (slot['current_node'] - 1 + len(self.nodos)) % len(self.nodos)
                 self.node_status[slot['current_node']] = "Idle"
                 self.node_colors[slot['current_node']] = "base"
@@ -162,10 +161,6 @@ class DQDBSimulator(QWidget):
                 else:
                     slot['position'][0] = self.nodos[slot['current_node'] + 1][0]
         return log_msg
-
-    def update_slot_speeds(self):
-        for slot in self.slots:
-            slot['timer'].start(self.speed_slider.value())
 
     def paintEvent(self, event):
         painter = QPainter(self)

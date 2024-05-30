@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QComboBox
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox
 from PyQt6.QtCore import Qt
+
 class UserControls(QWidget):
     def __init__(self, main_window):
         super().__init__()
@@ -9,31 +10,16 @@ class UserControls(QWidget):
     def init_ui(self):
         self.layout = QVBoxLayout(self)
 
-        # Speed slider
-        self.speed_slider = QSlider(Qt.Orientation.Horizontal)
-        self.speed_slider.setMinimum(10)
-        self.speed_slider.setMaximum(200)
-        self.speed_slider.setValue(50)
-        self.speed_slider.setTickInterval(10)
-        self.speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
-
-        slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel('Speed:'))
-        slider_layout.addWidget(self.speed_slider)
-        slider_widget = QWidget()
-        slider_widget.setLayout(slider_layout)
-        slider_widget.setMaximumHeight(50)
-
         # Start button
-        self.start_button = QPushButton('Start Simulation')
+        self.start_button = QPushButton('Iniciar Simulación')
         self.start_button.clicked.connect(self.main_window.start_simulation)
 
         # Stop button
-        self.stop_button = QPushButton('Stop Simulation')
+        self.stop_button = QPushButton('Detener Simulación')
         self.stop_button.clicked.connect(self.main_window.stop_simulation)
 
         # Reset button
-        self.reset_button = QPushButton('Reset Simulation')
+        self.reset_button = QPushButton('Reiniciar Simulación')
         self.reset_button.clicked.connect(self.main_window.reset_simulation)
 
         # Custom slot selection
@@ -46,13 +32,13 @@ class UserControls(QWidget):
             self.start_node_combo.addItem(f'Node {i}', i - 1)
             self.end_node_combo.addItem(f'Node {i}', i - 1)
 
-        self.custom_slot_button = QPushButton('Set Custom Slots')
+        self.custom_slot_button = QPushButton('Configurar Slots Personalizados')
         self.custom_slot_button.clicked.connect(self.set_custom_slots)
 
         custom_slot_layout = QVBoxLayout()
-        custom_slot_layout.addWidget(QLabel('Start Node:'))
+        custom_slot_layout.addWidget(QLabel('Nodo Inicial:'))
         custom_slot_layout.addWidget(self.start_node_combo)
-        custom_slot_layout.addWidget(QLabel('End Node:'))
+        custom_slot_layout.addWidget(QLabel('Nodo Final:'))
         custom_slot_layout.addWidget(self.end_node_combo)
         custom_slot_layout.addWidget(QLabel('Bus:'))
         custom_slot_layout.addWidget(self.bus_combo)
@@ -61,7 +47,6 @@ class UserControls(QWidget):
         custom_slot_widget.setLayout(custom_slot_layout)
 
         # Add widgets to layout
-        self.layout.addWidget(slider_widget)
         self.layout.addWidget(self.start_button)
         self.layout.addWidget(self.stop_button)
         self.layout.addWidget(self.reset_button)

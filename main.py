@@ -10,7 +10,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('DQDB Simulator')
+        self.setWindowTitle('Simulador DQDB')
         self.setGeometry(100, 100, 1000, 600)  # Adjusted window size
 
         self.central_widget = QWidget()
@@ -33,15 +33,15 @@ class MainWindow(QMainWindow):
         self.right_layout = QVBoxLayout(self.right_widget)
         self.right_widget.setLayout(self.right_layout)
 
-        # Add top right double ring topology animation
-        self.ring_topology = RingTopology()
-        self.right_layout.addWidget(self.ring_topology)
-
         self.log_widget = QTextEdit()
         self.log_widget.setReadOnly(True)
         self.log_widget.setMaximumHeight(100)
 
-        self.simulator = DQDBSimulator(self.log_widget, self.controls.speed_slider)
+        # Add top right double ring topology animation
+        self.ring_topology = RingTopology()
+        self.right_layout.addWidget(self.ring_topology)
+
+        self.simulator = DQDBSimulator(self.log_widget)
 
         self.right_layout.addWidget(self.simulator)
         self.right_layout.addWidget(self.log_widget)
