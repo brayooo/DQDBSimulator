@@ -1,5 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QComboBox
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QComboBox
 
 class UserControls(QWidget):
     def __init__(self, main_window):
@@ -25,9 +24,6 @@ class UserControls(QWidget):
         # Custom slot selection
         self.start_node_combo = QComboBox()
         self.end_node_combo = QComboBox()
-        self.bus_combo = QComboBox()
-        self.bus_combo.addItem('Bus A', 'A')
-        self.bus_combo.addItem('Bus B', 'B')
         for i in range(1, 6):  # Assuming 5 nodes
             self.start_node_combo.addItem(f'Node {i}', i - 1)
             self.end_node_combo.addItem(f'Node {i}', i - 1)
@@ -40,8 +36,6 @@ class UserControls(QWidget):
         custom_slot_layout.addWidget(self.start_node_combo)
         custom_slot_layout.addWidget(QLabel('Nodo Final:'))
         custom_slot_layout.addWidget(self.end_node_combo)
-        custom_slot_layout.addWidget(QLabel('Bus:'))
-        custom_slot_layout.addWidget(self.bus_combo)
         custom_slot_layout.addWidget(self.custom_slot_button)
         custom_slot_widget = QWidget()
         custom_slot_widget.setLayout(custom_slot_layout)
@@ -55,5 +49,4 @@ class UserControls(QWidget):
     def set_custom_slots(self):
         start_node = self.start_node_combo.currentData()
         end_node = self.end_node_combo.currentData()
-        bus = self.bus_combo.currentData()
-        self.main_window.set_custom_slots(start_node, end_node, bus)
+        self.main_window.set_custom_slots(start_node, end_node)

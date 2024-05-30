@@ -42,27 +42,30 @@ class DQDBSimulator(QWidget):
         self.node_colors = ["base"] * len(self.nodos)
         self.update()
 
-    def set_custom_slots(self, start_node, end_node, bus):
+    def set_custom_slots(self, start_node, end_node):
         self.stop_simulation()
-        self.custom_logic.set_custom_parameters(start_node, end_node, bus)
+        self.custom_logic.set_custom_parameters(start_node, end_node)
         self.custom_logic.start_custom_simulation()
 
     def spawn_slot(self):
         if len(self.slots) < self.MAX_SLOTS:
-            # Decide randomly if the slot will be in bus A or bus B
-            bus = random.choice(['A', 'B'])
-            slot_type = random.choice(['send', 'receive'])  # Randomly decide if the slot is for send or receive
-            if bus == 'A':
-                slot = {'position': [50, 150], 'direction': 'forward', 'current_node': 0, 'bus': 'A', 'type': slot_type, 'received': False}
-            else:
-                slot = {'position': [550, 250], 'direction': 'backward', 'current_node': len(self.nodos) - 1, 'bus': 'B', 'type': slot_type, 'received': False}
-            self.slots.append(slot)
-            self.log_widget.append(f"Nuevo slot de {slot_type} generado en el bus {bus}")
-            # Create a timer for the new slot
-            slot_timer = QTimer(self)
-            slot_timer.timeout.connect(lambda s=slot: self.update_simulation(s))
-            slot_timer.start(50)  # Update based on a fixed value
-            slot['timer'] = slot_timer
+            # Create slots for bus A and bus B
+            slot_a = {'position': [50, 150], 'direction': 'forward', 'current_node': 0, 'bus': 'A', 'type': 'send', 'received': False}
+            slot_b = {'position': [550, 250], 'direction': 'backward', 'current_node': len(self.nodos) - 1, 'bus': 'B', 'type': 'receive', 'received': False}
+            self.slots.append(slot_a)
+            self.slots.append(slot_b)
+            self.log_widget.append("Nuevo slot de envío generado en el bus A")
+            self.log_widget.append("Nuevo slot de recepción generado en el bus B")
+            # Create timers for the new slots
+            slot_a_timer = QTimer(self)
+            slot_a_timer.timeout.connect(lambda s=slot_a: self.update_simulation(s))
+            slot_a_timer.start(50)  # Update based on a fixed value
+            slot_a['timer'] = slot_a_timer
+
+            slot_b_timer = QTimer(self)
+            slot_b_timer.timeout.connect(lambda s=slot_b: self.update_simulation(s))
+            slot_b_timer.start(50)  # Update based on a fixed value
+            slot_b['timer'] = slot_b_timer
 
     def update_simulation(self, slot):
         log_msg = ""
