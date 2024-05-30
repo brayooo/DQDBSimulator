@@ -87,13 +87,14 @@ class DQDBSimulator(QWidget):
                 slot['position'][0] += 2
             else:
                 slot['direction'] = 'down'
-                log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
                 self.node_status[slot['current_node']] = "Procesando"
                 self.node_colors[slot['current_node']] = "processing"
+                log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
         elif slot['direction'] == 'down':
             if slot['position'][1] < self.nodos[slot['current_node']][1]:
                 slot['position'][1] += 2
             else:
+                slot['direction'] = 'up'
                 if self.node_functions[slot['current_node']] == 'receive' and slot['type'] == 'receive':
                     log_msg = f"El nodo C{slot['current_node'] + 1} está recibiendo el slot."
                     slot['received'] = True
@@ -130,13 +131,14 @@ class DQDBSimulator(QWidget):
                 slot['position'][0] -= 2
             else:
                 slot['direction'] = 'up'
-                log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
                 self.node_status[slot['current_node']] = "Procesando"
                 self.node_colors[slot['current_node']] = "processing"
+                log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
         elif slot['direction'] == 'up':
             if slot['position'][1] > self.nodos[slot['current_node']][1]:
                 slot['position'][1] -= 2
             else:
+                slot['direction'] = 'down'
                 if self.node_functions[slot['current_node']] == 'receive' and slot['type'] == 'receive':
                     log_msg = f"El nodo C{slot['current_node'] + 1} está recibiendo el slot."
                     slot['received'] = True
@@ -188,6 +190,8 @@ class DQDBSimulator(QWidget):
                 painter.setBrush(QColor(0, 0, 255))  # Blue for sending
             elif self.node_colors[i] == "received":
                 painter.setBrush(QColor(255, 0, 0))  # Red for receiving
+            elif self.node_colors[i] == "custom":
+                painter.setBrush(QColor(255, 54, 221))
             painter.setPen(Qt.GlobalColor.black)
             painter.drawRect(x - 20, y - 20, 40, 40)
             painter.drawText(x - 10, y, 'C{}'.format(i + 1))
