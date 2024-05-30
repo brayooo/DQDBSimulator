@@ -18,7 +18,7 @@ class CustomSimulationLogic:
     def start_custom_simulation(self):
         if not self.initialized:
             self.simulator.log_widget.append(
-                f"Custom slot spawned desde el Node {self.custom_start_node + 1} to Node {self.custom_end_node + 1}")
+                f"Custom slot spawned desde el Node {self.custom_start_node + 1} al Node {self.custom_end_node + 1}")
             self.initialized = True
         self.timer.start(5000)
 

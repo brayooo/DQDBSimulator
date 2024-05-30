@@ -21,8 +21,8 @@ class UserControls(QWidget):
         self.start_node_combo = QComboBox()
         self.end_node_combo = QComboBox()
         for i in range(1, 6):
-            self.start_node_combo.addItem(f'Node {i}', i - 1)
-            self.end_node_combo.addItem(f'Node {i}', i - 1)
+            self.start_node_combo.addItem(f'Nodo {i}', i - 1)
+            self.end_node_combo.addItem(f'Nodo {i}', i - 1)
 
         self.custom_slot_button = QPushButton('Configurar Slots Personalizados')
         self.custom_slot_button.clicked.connect(self.set_custom_slots)
