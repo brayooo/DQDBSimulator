@@ -1,9 +1,7 @@
-import sys
 import random
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QFont
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QVBoxLayout, QTextEdit, QSlider, QHBoxLayout
-
+from PyQt6.QtWidgets import QWidget
 
 class DQDBSimulator(QWidget):
     MAX_SLOTS = 4  # Limiting the number of active slots
@@ -13,6 +11,7 @@ class DQDBSimulator(QWidget):
         self.nodos = [(100, 200), (200, 200), (300, 200), (400, 200), (500, 200)]
         self.node_functions = [random.choice(['send', 'receive']) for _ in self.nodos]
         self.node_status = ["Idle"] * len(self.nodos)  # Initialize node status as "Idle"
+        self.node_colors = ["base"] * len(self.nodos)  # Initialize node colors as "base"
         self.bus_a = [(50, 150), (550, 150)]
         self.bus_b = [(50, 250), (550, 250)]
         self.slots = []
@@ -22,8 +21,6 @@ class DQDBSimulator(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('DQDB Simulator')
-        self.setGeometry(100, 100, 800, 600)  # Adjusted window size
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.spawn_slot)
         self.timer.start(5000)  # Spawn a new slot every 5 seconds
@@ -35,13 +32,13 @@ class DQDBSimulator(QWidget):
         if len(self.slots) < self.MAX_SLOTS:
             # Decide randomly if the slot will be in bus A or bus B
             bus = random.choice(['A', 'B'])
+            slot_type = random.choice(['send', 'receive'])  # Randomly decide if the slot is for send or receive
             if bus == 'A':
-                slot = {'position': [50, 150], 'direction': 'forward', 'current_node': 0, 'bus': 'A'}
+                slot = {'position': [50, 150], 'direction': 'forward', 'current_node': 0, 'bus': 'A', 'type': slot_type, 'received': False}
             else:
-                slot = {'position': [550, 250], 'direction': 'backward', 'current_node': len(self.nodos) - 1,
-                        'bus': 'B'}
+                slot = {'position': [550, 250], 'direction': 'backward', 'current_node': len(self.nodos) - 1, 'bus': 'B', 'type': slot_type, 'received': False}
             self.slots.append(slot)
-            self.log_widget.append(f"New slot spawned in bus {bus}")
+            self.log_widget.append(f"New {slot_type} slot spawned in bus {bus}")
             # Create a timer for the new slot
             slot_timer = QTimer(self)
             slot_timer.timeout.connect(lambda s=slot: self.update_simulation(s))
@@ -70,18 +67,20 @@ class DQDBSimulator(QWidget):
                 slot['direction'] = 'down'
                 log_msg = f"Slot entering node C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
                 self.node_status[slot['current_node']] = "Processing"
+                self.node_colors[slot['current_node']] = "processing"
         elif slot['direction'] == 'down':
             if slot['position'][1] < self.nodos[slot['current_node']][1]:
                 slot['position'][1] += 2
             else:
-                if self.node_functions[slot['current_node']] == 'receive':
-                    log_msg = f"Node C{slot['current_node'] + 1} is receiving the slot. Slot is removed."
-                    self.slots_to_remove.append(slot)
-                    slot['timer'].stop()
+                if self.node_functions[slot['current_node']] == 'receive' and slot['type'] == 'receive':
+                    log_msg = f"Node C{slot['current_node'] + 1} is receiving the slot."
+                    slot['received'] = True
                     self.node_status[slot['current_node']] = "Received"
+                    self.node_colors[slot['current_node']] = "received"
                 else:
                     log_msg = f"Node C{slot['current_node'] + 1} is sending data"
                     self.node_status[slot['current_node']] = "Sending"
+                    self.node_colors[slot['current_node']] = "sending"
                 slot['direction'] = 'up'
         elif slot['direction'] == 'up':
             if slot['position'][1] > self.bus_a[0][1]:
@@ -91,7 +90,11 @@ class DQDBSimulator(QWidget):
                 log_msg = f"Slot exiting node C{slot['current_node'] + 1}"
                 slot['current_node'] = (slot['current_node'] + 1) % len(self.nodos)
                 self.node_status[slot['current_node']] = "Idle"
-                if slot['current_node'] == 0:
+                self.node_colors[slot['current_node']] = "base"
+                if slot['current_node'] == 0 and slot.get('received'):
+                    self.slots_to_remove.append(slot)
+                    slot['timer'].stop()
+                elif slot['current_node'] == 0:
                     slot['position'] = [50, 150]
                 else:
                     slot['position'][0] = self.nodos[slot['current_node'] - 1][0]
@@ -107,18 +110,20 @@ class DQDBSimulator(QWidget):
                 slot['direction'] = 'up'
                 log_msg = f"Slot entering node C{slot['current_node'] + 1} ({self.node_functions[slot['current_node']]})"
                 self.node_status[slot['current_node']] = "Processing"
+                self.node_colors[slot['current_node']] = "processing"
         elif slot['direction'] == 'up':
             if slot['position'][1] > self.nodos[slot['current_node']][1]:
                 slot['position'][1] -= 2
             else:
-                if self.node_functions[slot['current_node']] == 'receive':
-                    log_msg = f"Node C{slot['current_node'] + 1} is receiving the slot. Slot is removed."
-                    self.slots_to_remove.append(slot)
-                    slot['timer'].stop()
+                if self.node_functions[slot['current_node']] == 'receive' and slot['type'] == 'receive':
+                    log_msg = f"Node C{slot['current_node'] + 1} is receiving the slot."
+                    slot['received'] = True
                     self.node_status[slot['current_node']] = "Received"
+                    self.node_colors[slot['current_node']] = "received"
                 else:
                     log_msg = f"Node C{slot['current_node'] + 1} is sending data"
                     self.node_status[slot['current_node']] = "Sending"
+                    self.node_colors[slot['current_node']] = "sending"
                 slot['direction'] = 'down'
         elif slot['direction'] == 'down':
             if slot['position'][1] < self.bus_b[0][1]:
@@ -128,7 +133,11 @@ class DQDBSimulator(QWidget):
                 log_msg = f"Slot exiting node C{slot['current_node'] + 1}"
                 slot['current_node'] = (slot['current_node'] - 1 + len(self.nodos)) % len(self.nodos)
                 self.node_status[slot['current_node']] = "Idle"
-                if slot['current_node'] == len(self.nodos) - 1:
+                self.node_colors[slot['current_node']] = "base"
+                if slot['current_node'] == len(self.nodos) - 1 and slot.get('received'):
+                    self.slots_to_remove.append(slot)
+                    slot['timer'].stop()
+                elif slot['current_node'] == len(self.nodos) - 1:
                     slot['position'] = [550, 250]
                 else:
                     slot['position'][0] = self.nodos[slot['current_node'] + 1][0]
@@ -152,13 +161,18 @@ class DQDBSimulator(QWidget):
         painter.drawLine(*self.bus_b[0], *self.bus_b[1])
 
     def draw_nodos(self, painter):
-        painter.setPen(Qt.GlobalColor.black)
-        painter.setBrush(QColor(0, 128, 0))  # Dark green color
-        font = QFont('Arial', 10, QFont.Weight.Bold)
-        painter.setFont(font)
-        for x, y in self.nodos:
+        for i, (x, y) in enumerate(self.nodos):
+            if self.node_colors[i] == "base":
+                painter.setBrush(QColor(0, 128, 0))  # Dark green color
+            elif self.node_colors[i] == "processing":
+                painter.setBrush(QColor(255, 255, 0))  # Yellow for processing
+            elif self.node_colors[i] == "sending":
+                painter.setBrush(QColor(0, 0, 255))  # Blue for sending
+            elif self.node_colors[i] == "received":
+                painter.setBrush(QColor(255, 0, 0))  # Red for receiving
+            painter.setPen(Qt.GlobalColor.black)
             painter.drawRect(x - 20, y - 20, 40, 40)
-            painter.drawText(x - 10, y, 'C{}'.format(self.nodos.index((x, y)) + 1))
+            painter.drawText(x - 10, y, 'C{}'.format(i + 1))
 
     def draw_node_status(self, painter):
         font = QFont('Arial', 8)
@@ -167,9 +181,9 @@ class DQDBSimulator(QWidget):
             painter.drawText(x - 30, y + 50, self.node_status[i])
 
     def draw_slots(self, painter):
-        painter.setPen(Qt.GlobalColor.black)
-        painter.setBrush(QColor(255, 215, 0))  # Gold color
         for slot in self.slots:
+            painter.setBrush(QColor(255, 215, 0))  # Gold color for all slots
+            painter.setPen(Qt.GlobalColor.black)
             painter.drawRect(slot['position'][0] - 10, slot['position'][1] - 10, 20, 20)
             painter.drawText(slot['position'][0] - 5, slot['position'][1] + 5, 'Slot')
 
@@ -180,57 +194,3 @@ class DQDBSimulator(QWidget):
                 if slot in self.slots:
                     self.slots.remove(slot)
             self.slots_to_remove.clear()
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.init_ui()
-
-    def init_ui(self):
-        self.setWindowTitle('DQDB Simulator')
-        self.setGeometry(100, 100, 800, 600)  # Adjusted window size
-
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        self.layout = QVBoxLayout(self.central_widget)
-
-        self.log_widget = QTextEdit()
-        self.log_widget.setReadOnly(True)
-        self.log_widget.setMaximumHeight(150)
-
-        speed_slider_widget = self.create_speed_slider()
-
-        self.simulator = DQDBSimulator(self.log_widget, self.speed_slider)
-
-        self.layout.addWidget(self.simulator)
-        self.layout.addWidget(speed_slider_widget)
-        self.layout.addWidget(self.log_widget)
-
-    def create_speed_slider(self):
-        self.speed_slider = QSlider(Qt.Orientation.Horizontal)
-        self.speed_slider.setMinimum(10)
-        self.speed_slider.setMaximum(200)
-        self.speed_slider.setValue(50)
-        self.speed_slider.setTickInterval(10)
-        self.speed_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
-
-        slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel('Speed:'))
-        slider_layout.addWidget(self.speed_slider)
-        slider_widget = QWidget()
-        slider_widget.setLayout(slider_layout)
-
-        return slider_widget
-
-
-def main():
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec())
-
-
-if __name__ == '__main__':
-    main()
