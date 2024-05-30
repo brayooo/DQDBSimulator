@@ -191,7 +191,7 @@ class DQDBSimulator(QWidget):
             elif self.node_colors[i] == "received":
                 painter.setBrush(QColor(255, 0, 0))  # Red for receiving
             elif self.node_colors[i] == "custom":
-                painter.setBrush(QColor(255, 54, 221))  # Custom color for custom slots
+                painter.setBrush(QColor(255, 54, 221))  # Custom color
             painter.setPen(Qt.GlobalColor.black)
             painter.drawRect(x - 20, y - 20, 40, 40)
             painter.drawText(x - 10, y, 'C{}'.format(i + 1))

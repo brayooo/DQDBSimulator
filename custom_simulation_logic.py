@@ -2,8 +2,7 @@ import random
 from PyQt6.QtCore import QTimer
 
 class CustomSimulationLogic:
-    MAX_SLOTS = 4  # Limiting the number of active slots
-
+    MAX_SLOTS = 4
     def __init__(self, dqdb_simulator):
         self.simulator = dqdb_simulator
         self.custom_start_node = 0
@@ -21,7 +20,7 @@ class CustomSimulationLogic:
             self.simulator.log_widget.append(
                 f"Custom slot spawned desde el Node {self.custom_start_node + 1} to Node {self.custom_end_node + 1}")
             self.initialized = True
-        self.timer.start(5000)  # Spawn a new slot every 5 seconds
+        self.timer.start(5000)
 
     def stop_custom_simulation(self):
         self.timer.stop()

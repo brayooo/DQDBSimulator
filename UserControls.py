@@ -9,22 +9,18 @@ class UserControls(QWidget):
     def init_ui(self):
         self.layout = QVBoxLayout(self)
 
-        # Start button
         self.start_button = QPushButton('Iniciar Simulación')
         self.start_button.clicked.connect(self.main_window.start_simulation)
 
-        # Stop button
         self.stop_button = QPushButton('Detener Simulación')
         self.stop_button.clicked.connect(self.main_window.stop_simulation)
 
-        # Reset button
         self.reset_button = QPushButton('Reiniciar Simulación')
         self.reset_button.clicked.connect(self.main_window.reset_simulation)
 
-        # Custom slot selection
         self.start_node_combo = QComboBox()
         self.end_node_combo = QComboBox()
-        for i in range(1, 6):  # Assuming 5 nodes
+        for i in range(1, 6):
             self.start_node_combo.addItem(f'Node {i}', i - 1)
             self.end_node_combo.addItem(f'Node {i}', i - 1)
 
@@ -40,7 +36,6 @@ class UserControls(QWidget):
         custom_slot_widget = QWidget()
         custom_slot_widget.setLayout(custom_slot_layout)
 
-        # Add widgets to layout
         self.layout.addWidget(self.start_button)
         self.layout.addWidget(self.stop_button)
         self.layout.addWidget(self.reset_button)
