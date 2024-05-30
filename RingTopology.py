@@ -4,7 +4,6 @@ from PyQt6.QtGui import QPainter, QPen, QColor
 from PyQt6.QtCore import Qt, QTimer
 import math
 
-
 class RingTopology(QWidget):
     def __init__(self):
         super().__init__()
@@ -16,9 +15,13 @@ class RingTopology(QWidget):
         self.timer.start(100)  # Update positions every 100 ms
 
         self.topology_title = QLabel("Topología", self)
-        self.topology_title.move(self.width() // 2 - self.topology_title.width() // 4, 0)
+        self.topology_title.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center align the title
         self.topology_title.resize(self.width(), 40)
         self.topology_title.setStyleSheet("font-size: 32px; font-weight: bold;")
+
+    def resizeEvent(self, event):
+        self.topology_title.resize(self.width(), 40)
+        self.topology_title.move(0, 0)
 
     def update_positions(self):
         self.node_positions_outer = [(i, (offset + 1) % 360) for i, offset in self.node_positions_outer]

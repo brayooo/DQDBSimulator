@@ -1,7 +1,6 @@
 import random
 from PyQt6.QtCore import QTimer
 
-
 class CustomSimulationLogic:
     MAX_SLOTS = 4  # Limiting the number of active slots
 
@@ -11,12 +10,17 @@ class CustomSimulationLogic:
         self.custom_end_node = 0
         self.timer = QTimer(self.simulator)
         self.timer.timeout.connect(self.spawn_custom_slot)
+        self.initialized = False
 
     def set_custom_parameters(self, start_node, end_node):
         self.custom_start_node = start_node
         self.custom_end_node = end_node
 
     def start_custom_simulation(self):
+        if not self.initialized:
+            self.simulator.log_widget.append(
+                f"Custom slot spawned desde el Node {self.custom_start_node + 1} to Node {self.custom_end_node + 1}")
+            self.initialized = True
         self.timer.start(5000)  # Spawn a new slot every 5 seconds
 
     def stop_custom_simulation(self):
@@ -24,9 +28,6 @@ class CustomSimulationLogic:
 
     def spawn_custom_slot(self):
         if len(self.simulator.slots) < self.MAX_SLOTS:
-            start_x, start_y = self.simulator.nodos[self.custom_start_node]
-            end_x, end_y = self.simulator.nodos[self.custom_end_node]
-
             slot_a = {
                 'position': [50, 150],
                 'direction': 'forward',
@@ -53,10 +54,6 @@ class CustomSimulationLogic:
 
             self.simulator.slots.append(slot_a)
             self.simulator.slots.append(slot_b)
-            self.simulator.log_widget.append(
-                f"Custom slot spawned from Node {self.custom_start_node + 1} to Node {self.custom_end_node + 1} on bus A")
-            self.simulator.log_widget.append(
-                f"Custom slot spawned from Node {self.custom_end_node + 1} to Node {self.custom_start_node + 1} on bus B")
 
             # Create timers for the new slots
             slot_a_timer = QTimer(self.simulator)
@@ -88,13 +85,13 @@ class CustomSimulationLogic:
 
     def update_slot_a(self, slot):
         log_msg = ""
-        # Move the slot position in bus A
         if slot['direction'] == 'forward':
             if slot['position'][0] < self.simulator.nodos[slot['current_node']][0]:
                 slot['position'][0] += 2
             else:
                 slot['direction'] = 'down'
-                if slot['current_node'] in [slot['start_node'], slot['end_node']]:
+                if (slot['current_node'] == slot['start_node'] and slot['start_node'] < slot['end_node']) or (
+                        slot['current_node'] == slot['end_node'] and slot['start_node'] < slot['end_node']):
                     self.simulator.node_status[slot['current_node']] = "Procesando"
                     self.simulator.node_colors[slot['current_node']] = "custom"
                     log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.simulator.node_functions[slot['current_node']]})"
@@ -103,7 +100,7 @@ class CustomSimulationLogic:
                 slot['position'][1] += 2
             else:
                 slot['direction'] = 'up'
-                if slot['current_node'] in [slot['start_node'], slot['end_node']]:
+                if slot['current_node'] == slot['end_node'] and slot['start_node'] < slot['end_node']:
                     if self.simulator.node_functions[slot['current_node']] == 'receive':
                         log_msg = f"Node C{slot['current_node'] + 1} received the slot."
                         slot['received'] = True
@@ -121,7 +118,8 @@ class CustomSimulationLogic:
                 slot['position'][1] -= 2
             else:
                 slot['direction'] = 'forward'
-                if slot['current_node'] not in [slot['start_node'], slot['end_node']]:
+                if (slot['current_node'] == slot['start_node'] and slot['start_node'] < slot['end_node']) or (
+                        slot['current_node'] == slot['end_node'] and slot['start_node'] < slot['end_node']):
                     self.simulator.node_status[slot['current_node']] = "Idle"
                     self.simulator.node_colors[slot['current_node']] = "base"
                 slot['current_node'] = (slot['current_node'] + 1) % len(self.simulator.nodos)
@@ -136,13 +134,13 @@ class CustomSimulationLogic:
 
     def update_slot_b(self, slot):
         log_msg = ""
-        # Move the slot position in bus B
         if slot['direction'] == 'backward':
             if slot['position'][0] > self.simulator.nodos[slot['current_node']][0]:
                 slot['position'][0] -= 2
             else:
                 slot['direction'] = 'up'
-                if slot['current_node'] in [slot['start_node'], slot['end_node']]:
+                if (slot['current_node'] == slot['start_node'] and slot['start_node'] < slot['end_node']) or (
+                        slot['current_node'] == slot['end_node'] and slot['start_node'] < slot['end_node']):
                     self.simulator.node_status[slot['current_node']] = "Procesando"
                     self.simulator.node_colors[slot['current_node']] = "custom"
                     log_msg = f"Slot entrando en el nodo C{slot['current_node'] + 1} ({self.simulator.node_functions[slot['current_node']]})"
@@ -151,7 +149,7 @@ class CustomSimulationLogic:
                 slot['position'][1] -= 2
             else:
                 slot['direction'] = 'down'
-                if slot['current_node'] in [slot['start_node'], slot['end_node']]:
+                if slot['current_node'] == slot['end_node'] and slot['start_node'] < slot['end_node']:
                     if self.simulator.node_functions[slot['current_node']] == 'receive':
                         log_msg = f"Node C{slot['current_node'] + 1} received the slot."
                         slot['received'] = True
@@ -169,11 +167,11 @@ class CustomSimulationLogic:
                 slot['position'][1] += 2
             else:
                 slot['direction'] = 'backward'
-                if slot['current_node'] not in [slot['start_node'], slot['end_node']]:
+                if (slot['current_node'] == slot['start_node'] and slot['start_node'] < slot['end_node']) or (
+                        slot['current_node'] == slot['end_node'] and slot['start_node'] < slot['end_node']):
                     self.simulator.node_status[slot['current_node']] = "Idle"
                     self.simulator.node_colors[slot['current_node']] = "base"
-                slot['current_node'] = (slot['current_node'] - 1 + len(self.simulator.nodos)) % len(
-                    self.simulator.nodos)
+                slot['current_node'] = (slot['current_node'] - 1 + len(self.simulator.nodos)) % len(self.simulator.nodos)
                 if slot['current_node'] == len(self.simulator.nodos) - 1 and slot.get('received'):
                     self.simulator.slots_to_remove.append(slot)
                     slot['timer'].stop()
