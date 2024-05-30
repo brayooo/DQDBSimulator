@@ -2,6 +2,7 @@ import random
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QFont
 from PyQt6.QtWidgets import QWidget
+from custom_simulation_logic import CustomSimulationLogic
 
 class DQDBSimulator(QWidget):
     MAX_SLOTS = 4  # Limiting the number of active slots
@@ -18,15 +19,34 @@ class DQDBSimulator(QWidget):
         self.slots_to_remove = []
         self.log_widget = log_widget
         self.speed_slider = speed_slider
+        self.timer = QTimer(self)
+        self.custom_logic = CustomSimulationLogic(self)
         self.init_ui()
 
     def init_ui(self):
-        self.timer = QTimer(self)
         self.timer.timeout.connect(self.spawn_slot)
+
+    def start_simulation(self):
         self.timer.start(5000)  # Spawn a new slot every 5 seconds
 
-        # Connect the slider value change to update the speed of all slots
-        self.speed_slider.valueChanged.connect(self.update_slot_speeds)
+    def stop_simulation(self):
+        self.timer.stop()
+        for slot in self.slots:
+            slot['timer'].stop()
+        self.slots.clear()
+        self.update()
+
+    def reset_simulation(self):
+        self.stop_simulation()
+        self.log_widget.clear()
+        self.node_status = ["Idle"] * len(self.nodos)
+        self.node_colors = ["base"] * len(self.nodos)
+        self.update()
+
+    def set_custom_slots(self, start_node, end_node, bus):
+        self.stop_simulation()
+        self.custom_logic.set_custom_parameters(start_node, end_node, bus)
+        self.custom_logic.start_custom_simulation()
 
     def spawn_slot(self):
         if len(self.slots) < self.MAX_SLOTS:
@@ -83,7 +103,7 @@ class DQDBSimulator(QWidget):
                     self.node_colors[slot['current_node']] = "sending"
                 slot['direction'] = 'up'
         elif slot['direction'] == 'up':
-            if slot['position'][1] > self.bus_a[0][1]:
+            if slot['position'][1] > 150:
                 slot['position'][1] -= 2
             else:
                 slot['direction'] = 'forward'
@@ -126,7 +146,7 @@ class DQDBSimulator(QWidget):
                     self.node_colors[slot['current_node']] = "sending"
                 slot['direction'] = 'down'
         elif slot['direction'] == 'down':
-            if slot['position'][1] < self.bus_b[0][1]:
+            if slot['position'][1] < 250:
                 slot['position'][1] += 2
             else:
                 slot['direction'] = 'backward'

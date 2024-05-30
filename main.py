@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLabel, QFrame
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QFrame
 from DQDBSimulator import DQDBSimulator
 from RingTopology import RingTopology
 from UserControls import UserControls
@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         self.layout = QHBoxLayout(self.central_widget)
 
         # Left side for controls
-        self.controls = UserControls()
+        self.controls = UserControls(self)
         self.layout.addWidget(self.controls)
 
         # Add vertical line
@@ -47,6 +47,18 @@ class MainWindow(QMainWindow):
         self.right_layout.addWidget(self.log_widget)
 
         self.layout.addWidget(self.right_widget)
+
+    def start_simulation(self):
+        self.simulator.start_simulation()
+
+    def stop_simulation(self):
+        self.simulator.stop_simulation()
+
+    def reset_simulation(self):
+        self.simulator.reset_simulation()
+
+    def set_custom_slots(self, start_node, end_node, bus):
+        self.simulator.set_custom_slots(start_node, end_node, bus)
 
 def main():
     app = QApplication(sys.argv)
