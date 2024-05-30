@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QLabel
 from PyQt6.QtGui import QPainter, QPen, QColor
 from PyQt6.QtCore import Qt, QTimer
 import math
@@ -15,6 +15,11 @@ class RingTopology(QWidget):
         self.timer.timeout.connect(self.update_positions)
         self.timer.start(100)  # Update positions every 100 ms
 
+        self.topology_title = QLabel("Topología", self)
+        self.topology_title.move(self.width() // 2 - self.topology_title.width() // 4, 0)
+        self.topology_title.resize(self.width(), 40)
+        self.topology_title.setStyleSheet("font-size: 32px; font-weight: bold;")
+
     def update_positions(self):
         self.node_positions_outer = [(i, (offset + 1) % 360) for i, offset in self.node_positions_outer]
         self.node_positions_inner = [(i, (offset - 1) % 360) for i, offset in self.node_positions_inner]
@@ -26,7 +31,7 @@ class RingTopology(QWidget):
         self.draw_ring_topology(painter)
 
     def draw_ring_topology(self, painter):
-        center_x, center_y = self.width() // 2, self.height() // 2
+        center_x, center_y = self.width() // 2, self.height() // 1.6
         outer_radius = min(self.width(), self.height()) // 3  # Larger outer radius
         inner_radius = min(self.width(), self.height()) // 6.5  # Smaller inner radius
         painter.setPen(QPen(Qt.GlobalColor.black, 2))
@@ -57,7 +62,7 @@ class RingTopology(QWidget):
         # Central nodes
         pentagon_radius = inner_radius // 2  # Radius for the pentagon
         pentagon_angles = [i * (360 / 5) for i in range(5)]  # Angles for the pentagon nodes
-        painter.setBrush(QColor(0, 128, 0)) # Set color for central nodes green
+        painter.setBrush(QColor(0, 128, 0))  # Set color for central nodes green
 
         for angle in pentagon_angles:
             rad = angle * (math.pi / 180)  # Convert to radians
