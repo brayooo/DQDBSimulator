@@ -27,8 +27,8 @@ class RingTopology(QWidget):
 
     def draw_ring_topology(self, painter):
         center_x, center_y = self.width() // 2, self.height() // 2
-        outer_radius = min(self.width(), self.height()) // 3 # Larger outer radius
-        inner_radius = min(self.width(), self.height()) // 6.5 # Smaller inner radius
+        outer_radius = min(self.width(), self.height()) // 3  # Larger outer radius
+        inner_radius = min(self.width(), self.height()) // 6.5  # Smaller inner radius
         painter.setPen(QPen(Qt.GlobalColor.black, 2))
 
         # Outer ring
@@ -42,7 +42,7 @@ class RingTopology(QWidget):
             rad = angle * (math.pi / 180)
             node_x = int(center_x + outer_radius * math.cos(rad))  # Convert to int
             node_y = int(center_y + outer_radius * math.sin(rad))  # Convert to int
-            painter.setBrush(QColor(0, 128, 0))  # Set color for outer nodes
+            painter.setBrush(QColor(255, 215, 0))  # Set color for outer nodes
             painter.drawRect(node_x - 5, node_y - 5, 10, 10)  # Draw square nodes
 
         # Nodes on the inner ring
@@ -51,16 +51,16 @@ class RingTopology(QWidget):
             rad = angle * (math.pi / 180)
             node_x = int(center_x + inner_radius * math.cos(rad))  # Convert to int
             node_y = int(center_y + inner_radius * math.sin(rad))  # Convert to int
-            painter.setBrush(QColor(255, 0, 0))  # Set color for inner nodes
+            painter.setBrush(QColor(255, 215, 0))  # Set color for inner nodes
             painter.drawRect(node_x - 5, node_y - 5, 10, 10)  # Draw square nodes
 
         # Central nodes
         pentagon_radius = inner_radius // 2  # Radius for the pentagon
-        pentagon_angles = [i * (360 / 5) for i in range(5)] # Angles for the pentagon nodes
-        painter.setBrush(QColor(0, 0, 0))  # Set color for central nodes
+        pentagon_angles = [i * (360 / 5) for i in range(5)]  # Angles for the pentagon nodes
+        painter.setBrush(QColor(0, 128, 0)) # Set color for central nodes green
 
         for angle in pentagon_angles:
-            rad = angle * (math.pi / 180) # Convert to radians
+            rad = angle * (math.pi / 180)  # Convert to radians
             node_x = int(center_x + pentagon_radius * math.cos(rad) * 3.3)  # Convert to int
             node_y = int(center_y + pentagon_radius * math.sin(rad) * 3.3)  # Convert to int
-            painter.drawRect(node_x - 5, node_y - 5, 20, 20) # Draw square nodes
+            painter.drawRect(node_x - 5, node_y - 5, 20, 20)  # Draw square nodes
