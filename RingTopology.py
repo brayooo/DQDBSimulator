@@ -4,10 +4,11 @@ from PyQt6.QtGui import QPainter, QPen, QColor
 from PyQt6.QtCore import Qt, QTimer
 import math
 
+
 class RingTopology(QWidget):
     def __init__(self):
         super().__init__()
-        self.setMinimumSize(200, 100)  # Ensure the widget has a minimum size
+        self.setMinimumSize(400, 200)  # Ensure the widget has a minimum size
         self.node_positions_outer = [(i, 0) for i in range(8)]  # (angle index, angle offset) for outer ring
         self.node_positions_inner = [(i, 0) for i in range(8)]  # (angle index, angle offset) for inner ring
         self.timer = QTimer(self)
@@ -16,17 +17,18 @@ class RingTopology(QWidget):
 
     def update_positions(self):
         self.node_positions_outer = [(i, (offset + 1) % 360) for i, offset in self.node_positions_outer]
-        self.node_positions_inner = [(i, (offset + 1) % 360) for i, offset in self.node_positions_inner]
+        self.node_positions_inner = [(i, (offset - 1) % 360) for i, offset in self.node_positions_inner]
         self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
+        # painter.fillRect(self.rect(), QColor(128, 128, 128))  # Fill the background with white color
         self.draw_ring_topology(painter)
 
     def draw_ring_topology(self, painter):
         center_x, center_y = self.width() // 2, self.height() // 2
-        outer_radius = min(self.width(), self.height()) // 4
-        inner_radius = min(self.width(), self.height()) // 8
+        outer_radius = min(self.width(), self.height()) // 3 # Larger outer radius
+        inner_radius = min(self.width(), self.height()) // 6.5 # Smaller inner radius
         painter.setPen(QPen(Qt.GlobalColor.black, 2))
 
         # Outer ring
@@ -51,3 +53,14 @@ class RingTopology(QWidget):
             node_y = int(center_y + inner_radius * math.sin(rad))  # Convert to int
             painter.setBrush(QColor(255, 0, 0))  # Set color for inner nodes
             painter.drawRect(node_x - 5, node_y - 5, 10, 10)  # Draw square nodes
+
+        # Central nodes
+        pentagon_radius = inner_radius // 2  # Radius for the pentagon
+        pentagon_angles = [i * (360 / 5) for i in range(5)] # Angles for the pentagon nodes
+        painter.setBrush(QColor(0, 0, 0))  # Set color for central nodes
+
+        for angle in pentagon_angles:
+            rad = angle * (math.pi / 180) # Convert to radians
+            node_x = int(center_x + pentagon_radius * math.cos(rad) * 3.3)  # Convert to int
+            node_y = int(center_y + pentagon_radius * math.sin(rad) * 3.3)  # Convert to int
+            painter.drawRect(node_x - 5, node_y - 5, 20, 20) # Draw square nodes
